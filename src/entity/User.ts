@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, BeforeInsert } from "typeorm";
+import * as bcrypt from "bcrypt";
 
 @Entity()
 export class User extends BaseEntity {
@@ -14,7 +15,7 @@ export class User extends BaseEntity {
     @Column()
     age: number;
 
-    @Column("varchar", { length: 50, nullable: true })
+    @Column("varchar", { length: 50, default: "default" })
     nickname?: string;
 
     @Column()
@@ -25,6 +26,18 @@ export class User extends BaseEntity {
 
     @BeforeInsert()
     beforeInsert() {
-        if (!this.nickname || this.nickname.length === 0) this.nickname = "default";
+        if (this.password && this.password.length > 0)
+            this.password = bcrypt.hashSync(this.password, bcrypt.genSaltSync(10));
+    }
+
+    compare(password: string): boolean {
+        return bcrypt.compareSync(password, this.password);
+    }
+
+    getToToken(): Partial<User> {
+        return {
+            id: this.id,
+            email: this.email
+        };
     }
 }

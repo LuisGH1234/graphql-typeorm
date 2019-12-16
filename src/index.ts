@@ -1,15 +1,19 @@
 import "reflect-metadata";
 import * as express from "express";
+import * as morgan from "morgan";
+import * as cors from "cors";
+import "./libs/jwt";
 import { createConnection } from "typeorm";
-import PrivateRoute from "./routes/private.route";
-import PublicRoute from "./routes/public.route";
+import Route from "./routes/graphql.route";
 
 const app = express();
 
-app.set("PORT", process.env.PORT || 3000);
+app.set("PORT", process.env.PORT || 3001);
 
-app.use("/private", PrivateRoute);
-app.use("/public", PublicRoute);
+app.use(morgan("tiny"));
+app.use(cors());
+
+app.use("/graphql", Route);
 
 createConnection().then(() => {
     app.listen(app.get("PORT"), err => {
